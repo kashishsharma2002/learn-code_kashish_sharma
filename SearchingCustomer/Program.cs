@@ -5,22 +5,30 @@ class Program
 {
     static void Main(string[] args)
     {
+        try
+        {
+            RunCustomerSearchWorkflow();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+       static void RunCustomerSearchWorkflow()
+    {
         var search = new CustomerSearch();
 
         Console.WriteLine("Search By Country: India");
         var byCountry = search.SearchByCountry("India");
         PrintResults(byCountry);
 
-
         Console.WriteLine("\nSearch By Company Name: 'Tec'");
         var byCompany = search.SearchByCompanyName("Tec");
         PrintResults(byCompany);
 
-
         Console.WriteLine("\nSearch By Contact: 'Sa'");
         var byContact = search.SearchByContact("Sa");
         PrintResults(byContact);
-
 
         Console.WriteLine("\nCSV Export (Country Search):");
         Console.WriteLine(search.ExportToCSV(byCountry));
@@ -31,7 +39,6 @@ class Program
         Console.WriteLine("\nCSV Export (Contact Search):");
         Console.WriteLine(search.ExportToCSV(byContact));
     }
-
     static void PrintResults(List<Customer> list)
     {
         foreach (var customer in list)

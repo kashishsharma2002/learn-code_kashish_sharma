@@ -1,55 +1,48 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 public class CustomerSearch
 {
     public List<Customer> SearchByCountry(string country)
     {
-        var query =
-            from customer in CustomerDatabase.Customers
-            where customer.Country.Contains(country)
-            orderby customer.CustomerID ascending
-            select customer;
+        if (country == null)
+            throw new ArgumentNullException(nameof(country));
 
-        return query.ToList();
+        return CustomerDatabase.Customers
+            .Where(c => c.Country != null && c.Country.Contains(country))
+            .OrderBy(c => c.CustomerID)
+            .ToList();
     }
 
     public List<Customer> SearchByCompanyName(string company)
     {
-        var query =
-            from customer in CustomerDatabase.Customers
-            where customer.CompanyName.Contains(company)
-            orderby customer.CustomerID ascending
-            select customer;
+        if (company == null)
+            throw new ArgumentNullException(nameof(company));
 
-        return query.ToList();
+        return CustomerDatabase.Customers
+            .Where(c => c.CompanyName != null && c.CompanyName.Contains(company))
+            .OrderBy(c => c.CustomerID)
+            .ToList();
     }
 
     public List<Customer> SearchByContact(string contact)
     {
-        var query =
-            from customer in CustomerDatabase.Customers
-            where customer.ContactName.Contains(contact)
-            orderby customer.CustomerID ascending
-            select customer;
+        if (contact == null)
+            throw new ArgumentNullException(nameof(contact));
 
-        return query.ToList();
+        return CustomerDatabase.Customers
+            .Where(c => c.ContactName != null && c.ContactName.Contains(contact))
+            .OrderBy(c => c.CustomerID)
+            .ToList();
     }
 
     public string ExportToCSV(List<Customer> data)
     {
-        StringBuilder csvBuilder = new StringBuilder();
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+
+        var csvBuilder = new StringBuilder();
 
         foreach (var item in data)
         {
-            csvBuilder.AppendFormat("{0},{1},{2},{3}",
-                item.CustomerID,
-                item.CompanyName,
-                item.ContactName,
-                item.Country);
-
-            csvBuilder.AppendLine();
+            csvBuilder.AppendLine($"{item.CustomerID},{item.CompanyName},{item.ContactName},{item.Country}");
         }
 
         return csvBuilder.ToString();

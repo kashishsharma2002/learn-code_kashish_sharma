@@ -1,14 +1,19 @@
 ﻿using LibraryManagement.Models;
 using LibraryManagement.Services;
+class Program
+{
+    static void Main(string[] args)
+    {
+        var location = new BookLocation("Reading Room", "Shelf 5");
 
-var location = new BookLocation("Reading Room", "Shelf 5");
+        var book = new Book("A Great Book", "John Doe", location);
 
-var book = new Book("A Great Book", "John Doe", location);
+        var printer = new HtmlPrinter();
+        var repo = new FileBookRepository();
 
-var printer = new HtmlPrinter();
-var repo = new FileBookRepository();
+        printer.PrintPage(book.GetCurrentPage());
+        repo.Save(book);
 
-printer.PrintPage(book.GetCurrentPage());
-repo.Save(book);
-
-Console.WriteLine($"Book Location: {book.Location}");
+        Console.WriteLine($"Book Location: {book.Location}");
+    }
+}
