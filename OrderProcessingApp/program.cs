@@ -49,7 +49,7 @@ namespace OrderProcessingApp
                     new() { ProductId = "P2", Quantity = 1, Price = 30 }
                 },
                 TotalAmount = 130,
-                PaymentMethod = "CARD"
+                PaymentMethod = PaymentMethod.Card
             };
         }
     }

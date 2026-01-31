@@ -13,26 +13,26 @@ namespace OrderProcessingApp.Infrastructure
             Console.WriteLine($"Checking availability for {items.Count} items");
             return Task.FromResult(true);
         }
-
-        public Task ReserveItems(List<OrderItem> items)
+        // Mock inventory service: method parameters are unused as this is a demo implementation 
+        public Task ReserveItems(List<OrderItem> _)
         {
             Console.WriteLine("Items reserved");
             return Task.CompletedTask;
         }
 
-        public Task CommitReservation(List<OrderItem> items)
+        public Task CommitReservation(List<OrderItem> _)
         {
             Console.WriteLine("Reservation committed");
             return Task.CompletedTask;
         }
 
-        public Task ReleaseReservation(List<OrderItem> items)
+        public Task ReleaseReservation(List<OrderItem> _)
         {
             Console.WriteLine("Reservation released");
             return Task.CompletedTask;
         }
 
-        public Task RestoreInventory(List<OrderItem> items)
+        public Task RestoreInventory(List<OrderItem> _)
         {
             Console.WriteLine("Inventory restored");
             return Task.CompletedTask;

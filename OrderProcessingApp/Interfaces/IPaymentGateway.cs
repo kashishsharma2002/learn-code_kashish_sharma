@@ -6,6 +6,6 @@ namespace OrderProcessingApp.Interfaces
     public interface IPaymentGateway
     {
         Task<PaymentResult> ProcessPayment(string customerId, decimal amount, string paymentMethod);
-        Task<bool> RefundPayment(string transactionId);
+        Task<bool> IsRefundSuccessful(string transactionId);
     }
 }

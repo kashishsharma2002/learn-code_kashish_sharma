@@ -2,9 +2,9 @@ namespace OrderProcessingApp.Models
 {
     public enum OrderStatus
     {
-        Pending,
-        Paid,
-        Cancelled,
-        Failed
+        Pending = 1,
+        Paid = 2,
+        Cancelled = 3,
+        Failed = 4
     }
 }

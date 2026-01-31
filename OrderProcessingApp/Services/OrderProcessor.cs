@@ -42,7 +42,7 @@ public class OrderProcessor
             var payment = await _paymentGateway.ProcessPayment(
                 order.CustomerId,
                 order.TotalAmount,
-                order.PaymentMethod);
+                order.PaymentMethod.ToString());
 
             if (!payment.IsSuccessful)
             {
@@ -74,7 +74,7 @@ public class OrderProcessor
 
         if (order.Status == OrderStatus.Paid && order.TransactionId != null)
         {
-            await _paymentGateway.RefundPayment(order.TransactionId);
+            await _paymentGateway.IsRefundSuccessful(order.TransactionId);
             await _inventoryService.RestoreInventory(order.Items);
         }
 
