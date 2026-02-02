@@ -1,19 +1,16 @@
 using BankingManagementSystem.Models;
 using BankingManagementSystem.Interfaces;
 using BankingManagementSystem.Common;
-using System.Diagnostics;
-using System.Data;
-using System.Security.AccessControl;
-using System.ComponentModel;
+using BankingManagementSystem.Exceptions;
 
 namespace BankingManagementSystem.Controllers;
 
 public class CustomerController
 {
     private readonly ICustomerService _customerService;
-    private readonly InputReader _inputReader;
+    private readonly IInputReader _inputReader;
 
-    public CustomerController(ICustomerService customerService, InputReader inputReader)
+    public CustomerController(ICustomerService customerService, IInputReader inputReader)
     {
         _customerService = customerService;
         _inputReader = inputReader;
@@ -21,9 +18,20 @@ public class CustomerController
 
     public void CreateCustomer()
     {
-        var profile = ReadCustomerInput();
-        var customer = _customerService.RegisterCustomer(profile);
-        Console.WriteLine($"Customer created successfully with ID: {customer.CustomerId}");
+        try
+        {
+            var profile = ReadCustomerInput();
+            var customer = _customerService.RegisterCustomer(profile);
+            Console.WriteLine($"Customer created successfully with ID: {customer.CustomerId}");
+        }
+        catch (InvalidBankingOperationException ex)
+        {
+            Console.WriteLine($"Validation Error: {ex.Message}");
+        }
+        catch (ArgumentNullException ex)
+        {
+            Console.WriteLine($"Input Error: {ex.Message}");
+        }
     }
 
     private CustomerProfile ReadCustomerInput()
@@ -42,6 +50,10 @@ public class CustomerController
         {
             AddressLine1 = _inputReader.ReadRequiredString("Enter Address Line 1:"),
             AddressLine2 = _inputReader.ReadRequiredString("Enter Address Line 2:"),
+            City = _inputReader.ReadRequiredString("Enter City:"),
+            State = _inputReader.ReadRequiredString("Enter State:"),
+            PostalCode = _inputReader.ReadRequiredString("Enter Postal Code:"),
+            Country = _inputReader.ReadRequiredString("Enter Country:"),
             PhoneNumber = _inputReader.ReadWithRegex(
                 "Enter Phone Number:",
                 @"^[6-9]\d{9}$",
@@ -87,15 +99,16 @@ public class CustomerController
             var customer = _customerService.GetCustomer(customerId.Value);
             DisplayCustomer(customer);
         }
-        catch (InvalidOperationException ex)
+        catch (CustomerNotFoundException ex)
         {
-            HandleCustomerError(ex.Message);
+            Console.WriteLine($"Not Found: {ex.Message}");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            HandleCustomerError("Something went wrong. Please try again later.");
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
+
     public void CloseCustomer()
     {
         var customerId = ReadCustomerId();
@@ -107,25 +120,27 @@ public class CustomerController
             _customerService.CloseCustomer(customerId.Value);
             Console.WriteLine("Customer closed successfully.");
         }
-        catch (InvalidOperationException ex)
+        catch (CustomerNotFoundException ex)
         {
-            HandleCustomerError(ex.Message);
+            Console.WriteLine($"Error: {ex.Message}");
         }
-        catch (Exception)
+        catch (InvalidBankingOperationException ex)
         {
-            HandleCustomerError("Something went wrong. Please try again later.");
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
+
     private int? ReadCustomerId()
     {
-        var idInput = _inputReader.ReadRequiredString("Enter Customer ID to view:");
+        var idInput = _inputReader.ReadRequiredString("Enter Customer ID:");
         if (!int.TryParse(idInput, out int customerId))
         {
-            Console.WriteLine("Invalid ID");
+            Console.WriteLine("Invalid ID format");
             return null;
         }
         return customerId;
     }
+
     public void ViewAllCustomers()
     {
         try
@@ -138,11 +153,12 @@ public class CustomerController
                 Console.WriteLine("-----------------------");
             }
         }
-        catch (Exception ex)
+        catch (InvalidBankingOperationException ex)
         {
-            HandleCustomerError(ex.Message);
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
+
     private void DisplayCustomer(Customer customer)
     {
         Console.WriteLine($"Customer ID: {customer.CustomerId}");
@@ -150,10 +166,6 @@ public class CustomerController
         Console.WriteLine($"Date of Birth: {customer.Profile.BasicDetails.DateOfBirth:yyyy-MM-dd}");
         Console.WriteLine($"Nationality: {customer.Profile.BasicDetails.Nationality}");
         Console.WriteLine($"Email: {customer.Profile.ContactDetails.Email}");
-        Console.WriteLine($"Joined On: {customer.BankJoiningDate}");
-    }
-    private void HandleCustomerError(string message)
-    {
-        Console.WriteLine($"Error: {message}");
+        Console.WriteLine($"Joined On: {customer.BankJoiningDate:yyyy-MM-dd}");
     }
 }

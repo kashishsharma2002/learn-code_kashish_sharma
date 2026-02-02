@@ -8,4 +8,5 @@ public interface ICustomerRepository
     Customer? GetById(int customerId);
     IEnumerable<Customer> GetAll();
     void Remove(int customerId);
+    void Update(Customer customer);
 }

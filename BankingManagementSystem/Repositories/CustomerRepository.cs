@@ -1,5 +1,6 @@
 using BankingManagementSystem.Models;
 using BankingManagementSystem.Interfaces;
+
 namespace BankingManagementSystem.Repositories;
 
 public class CustomerRepository : ICustomerRepository
@@ -25,5 +26,16 @@ public class CustomerRepository : ICustomerRepository
     public void Remove(int customerId)
     {
         _customers.Remove(customerId);
+    }
+
+    public void Update(Customer customer)
+    {
+        if (customer == null)
+            throw new ArgumentNullException(nameof(customer));
+
+        if (_customers.ContainsKey(customer.CustomerId))
+            _customers[customer.CustomerId] = customer;
+        else
+            throw new KeyNotFoundException($"Customer {customer.CustomerId} not found");
     }
 }

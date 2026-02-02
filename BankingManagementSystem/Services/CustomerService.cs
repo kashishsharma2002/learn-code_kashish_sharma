@@ -1,9 +1,8 @@
 using BankingManagementSystem.Models;
 using BankingManagementSystem.Interfaces;
-using Microsoft.VisualBasic;
-using System.ComponentModel.DataAnnotations;
+using BankingManagementSystem.Exceptions;
 
-namespace BankingManagementSystem.Repositories;
+namespace BankingManagementSystem.Services;
 
 public class CustomerService : ICustomerService
 {
@@ -18,7 +17,7 @@ public class CustomerService : ICustomerService
     public Customer RegisterCustomer(CustomerProfile profile)
     {
         if (profile == null)
-            throw new ArgumentException("Customer profile cannot be null");
+            throw new ArgumentNullException(nameof(profile), "Customer profile cannot be null");
 
         ValidateAge(profile.BasicDetails.DateOfBirth);
 
@@ -32,7 +31,7 @@ public class CustomerService : ICustomerService
     {
         var customer = _customerRepository.GetById(customerId);
         if (customer == null)
-            throw new InvalidOperationException("Customer not found");
+            throw new CustomerNotFoundException(customerId);
 
         return customer;
     }
@@ -40,8 +39,8 @@ public class CustomerService : ICustomerService
     public IEnumerable<Customer> GetAllCustomers()
     {
         var customerList = _customerRepository.GetAll();
-        if(!customerList.Any())
-            throw new InvalidOperationException("No customers found");
+        if (!customerList.Any())
+            throw new InvalidBankingOperationException("No customers found");
         return customerList;
     }
 
@@ -49,12 +48,26 @@ public class CustomerService : ICustomerService
     {
         var customer = _customerRepository.GetById(customerId);
         if (customer == null)
-            throw new InvalidOperationException("Customer not found");
+            throw new CustomerNotFoundException(customerId);
         
         if (customer.IsClosed)
-            throw new InvalidOperationException("Customer is already closed");
+            throw new InvalidBankingOperationException("Customer is already closed");
 
         customer.Close();
+        _customerRepository.Update(customer);
+    }
+
+    public void UpdateCustomer(int customerId, CustomerProfile profile)
+    {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
+
+        var customer = _customerRepository.GetById(customerId);
+        if (customer == null)
+            throw new CustomerNotFoundException(customerId);
+
+        customer.Profile = profile;
+        _customerRepository.Update(customer);
     }
 
     private void ValidateAge(DateTime dateOfBirth)
@@ -65,7 +78,8 @@ public class CustomerService : ICustomerService
         if (dateOfBirth.Date > today.AddYears(-age))
             age--;
 
-        if (age < 12)
-            throw new InvalidOperationException("Customer must be at least 12 years old to open a bank account");
+        const int minimumAge = 12;
+        if (age < minimumAge)
+            throw new InvalidOperationException($"Customer must be at least {minimumAge} years old to open a bank account");
     }
 }
