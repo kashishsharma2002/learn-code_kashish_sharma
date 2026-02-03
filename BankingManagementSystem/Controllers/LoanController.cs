@@ -102,10 +102,10 @@ public class LoanController
     {
         try
         {
-            var loanId = _inputReader.ReadInt("Enter Loan ID:");
-            if (!loanId.HasValue)
-                throw new InvalidOperationException("Loan ID is required");
-            var loan = _loanService.GetLoanDetails(loanId.Value);
+            var customerId = _inputReader.ReadInt("Enter Customer ID:");
+            if (!customerId.HasValue)
+                throw new InvalidOperationException("Customer ID is required");
+            var loan = _loanService.GetLoanDetails(customerId.Value);
             DisplayLoanDetails(loan);
         }
         catch (Exception ex)

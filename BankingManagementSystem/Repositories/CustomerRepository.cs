@@ -23,10 +23,6 @@ public class CustomerRepository : ICustomerRepository
         return _customers.Values;
     }
 
-    public void Remove(int customerId)
-    {
-        _customers.Remove(customerId);
-    }
 
     public void Update(Customer customer)
     {

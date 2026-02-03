@@ -15,18 +15,7 @@ public class Loan
     public LoanType Type { get; set; }
     public LoanStatus Status { get; set; }
     
-    /// <summary>
-    /// Total interest amount calculated using SI formula: (Principal × Rate × Time) / 100
-    /// </summary>
     public decimal CalculatedInterest { get; set; }
-    
-    /// <summary>
-    /// Total amount to be repaid (Principal + Interest)
-    /// </summary>
     public decimal TotalRepayAmount { get; set; }
-    
-    /// <summary>
-    /// Monthly installment amount
-    /// </summary>
     public decimal MonthlyInstallment { get; set; }
 }

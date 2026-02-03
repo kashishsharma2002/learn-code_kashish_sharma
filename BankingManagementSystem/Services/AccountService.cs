@@ -9,7 +9,6 @@ public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
     private readonly ICustomerRepository _customerRepository;
-    private static int _accountIdCounter = 1;
 
     public AccountService(IAccountRepository accountRepository, ICustomerRepository customerRepository)
     {
@@ -29,7 +28,6 @@ public class AccountService : IAccountService
 
         var account = new Account
         {
-            AccountId = _accountIdCounter++,
             CustomerId = accountInfo.CustomerId,
             AccountType = accountInfo.AccountType,
             Balance = accountInfo.Balance,

@@ -24,16 +24,6 @@ public class AccountRepository : IAccountRepository
         return _accounts.Values;
     }
 
-    public void Remove(int accountId)
-    {
-        _accounts.Remove(accountId);
-    }
-
-    public Account? GetByCustomerId(int customerId)
-    {
-        return _accounts.Values.FirstOrDefault(a => a.CustomerId == customerId);
-    }
-
     public void Update(Account account)
     {
         if (_accounts.ContainsKey(account.AccountId))
@@ -46,8 +36,4 @@ public class AccountRepository : IAccountRepository
         }
     }
 
-    public bool AccountExists(int accountId)
-    {
-        return _accounts.ContainsKey(accountId);
-    }
 }

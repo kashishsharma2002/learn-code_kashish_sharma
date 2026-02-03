@@ -24,12 +24,4 @@ public class LoanRepository : ILoanRepository
         return _loans;
     }
 
-    public void Remove(int loanId)
-    {
-        var loan = _loans.FirstOrDefault(t => t.LoanId == loanId);
-        if (loan != null)
-        {
-            _loans.Remove(loan);
-        }
-    }
 }

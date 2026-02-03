@@ -12,14 +12,4 @@ public class Transaction
     public Transaction()
     {
     }
-
-    public Transaction(Transaction t)
-    {
-        TransactionId = t.TransactionId;
-        AccountId = t.AccountId;
-        Amount = t.Amount;
-        TransactionDate = t.TransactionDate;
-        TransactionType = t.TransactionType;
-        PaymentMethod = t.PaymentMethod;
-    }
 }

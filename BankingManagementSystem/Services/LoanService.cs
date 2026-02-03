@@ -111,14 +111,6 @@ public class LoanService : ILoanService
         return loan;
     }
 
-    public IEnumerable<Loan> GetAllLoans()
-    {
-        var loansList = _loanRepository.GetAll();
-        if (!loansList.Any())
-            throw new InvalidBankingOperationException("No loans found");
-        return loansList;
-    }
-
     private double GetInterestRate(LoanType type)
     {
         return type switch

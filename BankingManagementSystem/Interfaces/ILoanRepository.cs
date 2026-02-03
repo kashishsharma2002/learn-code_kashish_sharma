@@ -5,7 +5,6 @@ namespace BankingManagementSystem.Interfaces;
 public interface ILoanRepository
 {
     void Add(Loan loan);
-    Loan GetLoanByCustomerId(int customerId);
+    Loan? GetLoanByCustomerId(int customerId);
     IEnumerable<Loan> GetAll();
-    void Remove(int loanId);
 }

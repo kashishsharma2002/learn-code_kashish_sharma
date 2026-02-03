@@ -1,5 +1,6 @@
 using BankingManagementSystem.Models;
 using BankingManagementSystem.Interfaces;
+using System.Security.Cryptography.X509Certificates;
 
 namespace BankingManagementSystem.Repositories;
 
@@ -17,8 +18,4 @@ public class TransactionRepository : ITransactionRepository
         return _transactions;
     }
 
-    public IEnumerable<Transaction> GetTransactionByCustomerId(int customerId)
-    {
-        return _transactions.Where(t => t.AccountId == customerId).ToList();
-    }
 }
