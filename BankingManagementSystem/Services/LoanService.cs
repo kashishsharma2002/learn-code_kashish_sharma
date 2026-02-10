@@ -22,19 +22,20 @@ public class LoanService : ILoanService
         ArgumentNullException.ThrowIfNull(loan, nameof(loan));
 
         var customer = _customerRepository.GetById(loan.CustomerId);
+
         if (customer == null)
             throw new CustomerNotFoundException(loan.CustomerId);
 
         loan.LoanId = _loanIdCounter++;
         loan.ApplicationDate = DateTime.Now;
-        var interestRate = GetInterestRate(loan.Type);
-        loan.InterestRate = interestRate;
 
-        if (CheckLoanEligibility(loan))
+        loan.InterestRate = GetInterestRate(loan.Type);
+
+        if (IsLoanEligible(loan))
         {
             loan.IsEligible = true;
             loan.Status = LoanStatus.Approved;
-            
+
             CalculateInterest(loan);
         }
         else
@@ -44,10 +45,23 @@ public class LoanService : ILoanService
         }
 
         _loanRepository.Add(loan);
+
         return loan;
     }
 
-    public bool CheckLoanEligibility(Loan loan)
+    public Loan GetLoanDetails(int customerId)
+    {
+        var loan = _loanRepository.GetLoanByCustomerId(customerId);
+
+        if (loan == null)
+            throw new InvalidBankingOperationException(
+                $"No loan found for customer {customerId}"
+            );
+
+        return loan;
+    }
+
+    private bool IsLoanEligible(Loan loan)
     {
         var maxAmount = GetMaxLoanAmount(loan.Type);
         var minAge = GetMinEligibleAge(loan.Type);
@@ -91,24 +105,18 @@ public class LoanService : ILoanService
     private int GetCustomerAge(int customerId)
     {
         var customer = _customerRepository.GetById(customerId);
+
         if (customer == null)
             throw new CustomerNotFoundException(customerId);
 
         var today = DateTime.Today;
-        var age = today.Year - customer.Profile.BasicDetails.DateOfBirth.Year;
+        var dob = customer.Profile.BasicDetails.DateOfBirth;
+        var age = today.Year - dob.Year;
 
-        if (customer.Profile.BasicDetails.DateOfBirth.Date > today.AddYears(-age))
+        if (dob.Date > today.AddYears(-age))
             age--;
 
         return age;
-    }
-
-    public Loan GetLoanDetails(int customerId)
-    {
-        var loan = _loanRepository.GetLoanByCustomerId(customerId);
-        if (loan == null)
-            throw new InvalidBankingOperationException($"No loan found for customer {customerId}");
-        return loan;
     }
 
     private double GetInterestRate(LoanType type)
@@ -123,12 +131,13 @@ public class LoanService : ILoanService
             _ => throw new ArgumentException("Invalid loan type")
         };
     }
+
     private void CalculateInterest(Loan loan)
     {
         if (loan.Status != LoanStatus.Approved)
             return;
 
-        double timeInYears = loan.TermInMonths / 12.0;
+        var timeInYears = loan.TermInMonths / 12.0;
 
         decimal interest = loan.Amount * (decimal)loan.InterestRate * (decimal)timeInYears / 100;
         

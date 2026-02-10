@@ -22,6 +22,7 @@ public class CustomerService : ICustomerService
         ValidateAge(profile.BasicDetails.DateOfBirth);
 
         var customer = new Customer(_customerIdCounter++, profile);
+
         _customerRepository.Add(customer);
 
         return customer;
@@ -30,6 +31,7 @@ public class CustomerService : ICustomerService
     public Customer GetCustomer(int customerId)
     {
         var customer = _customerRepository.GetById(customerId);
+
         if (customer == null)
             throw new CustomerNotFoundException(customerId);
 
@@ -39,21 +41,25 @@ public class CustomerService : ICustomerService
     public IEnumerable<Customer> GetAllCustomers()
     {
         var customerList = _customerRepository.GetAll();
+
         if (!customerList.Any())
             throw new InvalidBankingOperationException("No customers found");
+
         return customerList;
     }
 
     public void CloseCustomer(int customerId)
     {
         var customer = _customerRepository.GetById(customerId);
+
         if (customer == null)
             throw new CustomerNotFoundException(customerId);
-        
+
         if (customer.IsClosed)
             throw new InvalidBankingOperationException("Customer is already closed");
 
         customer.Close();
+
         _customerRepository.Update(customer);
     }
 
@@ -63,23 +69,28 @@ public class CustomerService : ICustomerService
             throw new ArgumentNullException(nameof(profile));
 
         var customer = _customerRepository.GetById(customerId);
+
         if (customer == null)
             throw new CustomerNotFoundException(customerId);
 
         customer.Profile = profile;
+
         _customerRepository.Update(customer);
     }
 
     private void ValidateAge(DateTime dateOfBirth)
     {
+        const int minimumAge = 12;
+
         var today = DateTime.Today;
         var age = today.Year - dateOfBirth.Year;
 
         if (dateOfBirth.Date > today.AddYears(-age))
             age--;
 
-        const int minimumAge = 12;
         if (age < minimumAge)
-            throw new InvalidOperationException($"Customer must be at least {minimumAge} years old to open a bank account");
+            throw new InvalidOperationException(
+                $"Customer must be at least {minimumAge} years old to open a bank account"
+            );
     }
 }

@@ -15,6 +15,7 @@ public class CustomerRepository : ICustomerRepository
     public Customer? GetById(int customerId)
     {
         _customers.TryGetValue(customerId, out var customer);
+        
         return customer;
     }
 
@@ -22,7 +23,6 @@ public class CustomerRepository : ICustomerRepository
     {
         return _customers.Values;
     }
-
 
     public void Update(Customer customer)
     {

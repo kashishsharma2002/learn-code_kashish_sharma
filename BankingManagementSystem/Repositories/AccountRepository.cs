@@ -10,6 +10,7 @@ public class AccountRepository : IAccountRepository
     public void Add(Account account)
     {
         account.AccountId = _nextAccountId++;
+        
         _accounts[account.AccountId] = account;
     }
 
@@ -17,8 +18,10 @@ public class AccountRepository : IAccountRepository
     {
         if (_accounts.TryGetValue(accountId, out var account))
             return account;
+
         return null;
     }
+
     public IEnumerable<Account> GetAll()
     {
         return _accounts.Values;

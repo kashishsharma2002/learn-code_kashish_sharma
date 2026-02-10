@@ -1,6 +1,5 @@
 using BankingManagementSystem.Models;
 using BankingManagementSystem.Interfaces;
-using System.Security.Cryptography.X509Certificates;
 
 namespace BankingManagementSystem.Repositories;
 

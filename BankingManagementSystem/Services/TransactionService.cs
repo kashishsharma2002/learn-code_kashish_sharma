@@ -24,26 +24,14 @@ public class TransactionService : ITransactionService
             throw new ArgumentException("Transaction amount must be positive");
 
         var account = _accountRepository.GetById(transaction.AccountId);
+
         if (account == null)
             throw new AccountNotFoundException(transaction.AccountId);
 
         transaction.TransactionId = _transactionIdCounter++;
         transaction.TransactionDate = DateTime.Now;
 
-        switch (transaction.TransactionType)
-        {
-            case TransactionType.Withdrawal:
-                ProcessWithdrawal(account, transaction.Amount);
-                break;
-            case TransactionType.Deposit:
-                account.Balance += transaction.Amount;
-                break;
-            case TransactionType.Transfer:
-                ProcessWithdrawal(account, transaction.Amount);
-                break;
-            default:
-                throw new ArgumentException("Invalid transaction type");
-        }
+        ApplyTransactionEffect(account, transaction);
 
         _accountRepository.Update(account);
         _transactionRepository.Add(transaction);
@@ -59,11 +47,11 @@ public class TransactionService : ITransactionService
 
         if (sourceAccount == null)
             throw new AccountNotFoundException(sourceAccountId);
+
         if (destinationAccount == null)
             throw new AccountNotFoundException(destinationAccountId);
 
-        if (sourceAccount.Balance < amount)
-            throw new InsufficientFundsException(amount, sourceAccount.Balance);
+        EnsureSufficientBalance(sourceAccount, amount);
 
         sourceAccount.Balance -= amount;
         destinationAccount.Balance += amount;
@@ -84,19 +72,43 @@ public class TransactionService : ITransactionService
         _transactionRepository.Add(transaction);
     }
 
-    private void ProcessWithdrawal(Account account, decimal amount)
+    public IEnumerable<Transaction> GetAllTransactions()
     {
-        if (account.Balance < amount)
-            throw new InsufficientFundsException(amount, account.Balance);
+        var transactions = _transactionRepository.GetAll();
+
+        if (!transactions.Any())
+            throw new InvalidOperationException("No transactions found");
+
+        return transactions;
+    }
+
+    private void ApplyTransactionEffect(Account account, Transaction transaction)
+    {
+        switch (transaction.TransactionType)
+        {
+            case TransactionType.Deposit:
+                account.Balance += transaction.Amount;
+                break;
+
+            case TransactionType.Withdrawal:
+                Withdraw(account, transaction.Amount);
+                break;
+
+            default:
+                throw new InvalidOperationException("Transfers must be processed using ProcessTransfer");
+        }
+    }
+
+    private static void  Withdraw(Account account, decimal amount)
+    {
+        EnsureSufficientBalance(account, amount);
 
         account.Balance -= amount;
     }
 
-    public IEnumerable<Transaction> GetAllTransactions()
+    private static void EnsureSufficientBalance(Account account, decimal amount)
     {
-        var transactionsList = _transactionRepository.GetAll();
-        if (!transactionsList.Any())
-            throw new System.InvalidOperationException("No transactions found");
-        return transactionsList;
+        if (account.Balance < amount)
+            throw new InsufficientFundsException(amount, account.Balance);
     }
 }
