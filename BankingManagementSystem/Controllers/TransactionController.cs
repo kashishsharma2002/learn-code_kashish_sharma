@@ -35,20 +35,18 @@ public class TransactionController
         }
     }
 
-    public void ViewAllTransactions()
+    private TransactionType ReadTransactionType(string prompt)
     {
-        try
+        while (true)
         {
-            var transactions = _transactionService.GetAllTransactions();
+            var input = _inputReader.ReadRequiredString(prompt);
 
-            foreach (var transaction in transactions)
-            {
-                DisplayTransaction(transaction);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error retrieving transactions: {ex.Message}");
+            if (Enum.TryParse<TransactionType>(input, true, out var transactionType))
+                return transactionType;
+
+            Console.WriteLine(
+                "Invalid transaction type. Please enter Deposit, Withdrawal, or Transfer."
+            );
         }
     }
 
@@ -61,6 +59,24 @@ public class TransactionController
         }
 
         ProcessStandardTransaction(accountId, transactionType);
+    }
+
+    private void ProcessTransferTransaction(int sourceAccountId)
+    {
+        var destinationAccountId = _inputReader.ReadInt("Enter Destination Account ID:");
+
+        if (!destinationAccountId.HasValue)
+            throw new InvalidOperationException("Destination Account ID is required");
+
+        var amount = _inputReader.ReadDecimal("Enter Transfer Amount:");
+
+        _transactionService.ProcessTransfer(
+            sourceAccountId,
+            destinationAccountId.Value,
+            amount
+        );
+
+        Console.WriteLine("Transfer completed successfully.");
     }
 
     private void ProcessStandardTransaction(int accountId, TransactionType transactionType)
@@ -82,39 +98,6 @@ public class TransactionController
         Console.WriteLine("Transaction processed successfully.");
     }
 
-    private void ProcessTransferTransaction(int sourceAccountId)
-    {
-        var destinationAccountId = _inputReader.ReadInt("Enter Destination Account ID:");
-
-        if (!destinationAccountId.HasValue)
-            throw new InvalidOperationException("Destination Account ID is required");
-
-        var amount = _inputReader.ReadDecimal("Enter Transfer Amount:");
-
-        _transactionService.ProcessTransfer(
-            sourceAccountId,
-            destinationAccountId.Value,
-            amount
-        );
-
-        Console.WriteLine("Transfer completed successfully.");
-    }
-
-    private TransactionType ReadTransactionType(string prompt)
-    {
-        while (true)
-        {
-            var input = _inputReader.ReadRequiredString(prompt);
-
-            if (Enum.TryParse<TransactionType>(input, true, out var transactionType))
-                return transactionType;
-
-            Console.WriteLine(
-                "Invalid transaction type. Please enter Deposit, Withdrawal, or Transfer."
-            );
-        }
-    }
-
     private PaymentMethod ReadPaymentMethod(string prompt)
     {
         while (true)
@@ -127,6 +110,23 @@ public class TransactionController
             Console.WriteLine(
                 "Invalid payment method. Please enter Netbanking, DebitCard, CreditCard, Cheque, or UPI."
             );
+        }
+    }
+
+    public void ViewAllTransactions()
+    {
+        try
+        {
+            var transactions = _transactionService.GetAllTransactions();
+
+            foreach (var transaction in transactions)
+            {
+                DisplayTransaction(transaction);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error retrieving transactions: {ex.Message}");
         }
     }
 

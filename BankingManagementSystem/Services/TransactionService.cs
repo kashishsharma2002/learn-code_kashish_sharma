@@ -31,7 +31,7 @@ public class TransactionService : ITransactionService
         transaction.TransactionId = _transactionIdCounter++;
         transaction.TransactionDate = DateTime.Now;
 
-        ApplyTransactionEffect(account, transaction);
+        transaction.Apply(account);
 
         _accountRepository.Update(account);
         _transactionRepository.Add(transaction);
@@ -51,10 +51,8 @@ public class TransactionService : ITransactionService
         if (destinationAccount == null)
             throw new AccountNotFoundException(destinationAccountId);
 
-        EnsureSufficientBalance(sourceAccount, amount);
-
-        sourceAccount.Balance -= amount;
-        destinationAccount.Balance += amount;
+        sourceAccount.Withdraw(amount);
+        destinationAccount.Deposit(amount);
 
         _accountRepository.Update(sourceAccount);
         _accountRepository.Update(destinationAccount);
@@ -82,33 +80,4 @@ public class TransactionService : ITransactionService
         return transactions;
     }
 
-    private void ApplyTransactionEffect(Account account, Transaction transaction)
-    {
-        switch (transaction.TransactionType)
-        {
-            case TransactionType.Deposit:
-                account.Balance += transaction.Amount;
-                break;
-
-            case TransactionType.Withdrawal:
-                Withdraw(account, transaction.Amount);
-                break;
-
-            default:
-                throw new InvalidOperationException("Transfers must be processed using ProcessTransfer");
-        }
-    }
-
-    private static void  Withdraw(Account account, decimal amount)
-    {
-        EnsureSufficientBalance(account, amount);
-
-        account.Balance -= amount;
-    }
-
-    private static void EnsureSufficientBalance(Account account, decimal amount)
-    {
-        if (account.Balance < amount)
-            throw new InsufficientFundsException(amount, account.Balance);
-    }
 }

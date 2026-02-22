@@ -20,7 +20,10 @@ public class AccountController
     {
         try
         {
-            var account = ReadAccountFromInput();
+            var input = ReadAccountInput();
+
+            var account = new Account(input.customerId, input.type);
+            account.Deposit(input.deposit);
 
             var createdAccount = _accountService.CreateAccount(account);
 
@@ -40,7 +43,32 @@ public class AccountController
         }
     }
 
-    public Account GetAccountDetails()
+    private (int customerId, AccountType type, decimal deposit) ReadAccountInput()
+    {
+        var customerId = _inputReader.ReadInt("Enter Customer ID:");
+        if (!customerId.HasValue)
+            throw new ArgumentException("Customer ID is required");
+
+        var type = ReadAccountType("Enter Account Type:");
+        var deposit = _inputReader.ReadDecimal("Enter Initial Deposit:");
+
+        return (customerId.Value, type, deposit);
+    }
+
+    private AccountType ReadAccountType(string prompt)
+    {
+        while (true)
+        {
+            var input = _inputReader.ReadRequiredString(prompt);
+
+            if (Enum.TryParse<AccountType>(input, true, out var accountType))
+                return accountType;
+
+            Console.WriteLine("Invalid account type. Please enter Savings, Checking, or Business.");
+        }
+    }
+
+    public Account? GetAccountDetails()
     {
         var accountId = _inputReader.ReadInt("Enter Account ID:");
 
@@ -85,6 +113,15 @@ public class AccountController
         }
     }
 
+    private void DisplayAccount(Account account)
+    {
+        Console.WriteLine($"Account ID: {account.AccountId}");
+        Console.WriteLine($"Customer ID: {account.CustomerId}");
+        Console.WriteLine($"Account Type: {account.AccountType}");
+        Console.WriteLine($"Balance: {account.Balance:C}");
+        Console.WriteLine($"Status: {account.Status}");
+    }
+
     public void CloseCustomerAccount()
     {
         var accountId = _inputReader.ReadInt("Enter Account ID to close:");
@@ -107,47 +144,4 @@ public class AccountController
             Console.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    private Account ReadAccountFromInput()
-    {
-        var customerId = _inputReader.ReadInt("Enter Customer ID:");
-
-        if (!customerId.HasValue)
-            throw new ArgumentException("Customer ID is required");
-
-        var accountType = ReadAccountType("Enter Account Type (Savings/Checking/Business):");
-
-        var initialDeposit = _inputReader.ReadDecimal("Enter Initial Deposit Amount:");
-
-        return new Account
-        {
-            CustomerId = customerId.Value,
-            AccountType = accountType,
-            Balance = initialDeposit,
-            Status = AccountStatus.Active
-        };
-    }
-
-    private AccountType ReadAccountType(string prompt)
-    {
-        while (true)
-        {
-            var input = _inputReader.ReadRequiredString(prompt);
-
-            if (Enum.TryParse<AccountType>(input, true, out var accountType))
-                return accountType;
-
-            Console.WriteLine("Invalid account type. Please enter Savings, Checking, or Business.");
-        }
-    }
-
-    private void DisplayAccount(Account account)
-    {
-        Console.WriteLine($"Account ID: {account.AccountId}");
-        Console.WriteLine($"Customer ID: {account.CustomerId}");
-        Console.WriteLine($"Account Type: {account.AccountType}");
-        Console.WriteLine($"Balance: {account.Balance:C}");
-        Console.WriteLine($"Status: {account.Status}");
-    }
-
 }

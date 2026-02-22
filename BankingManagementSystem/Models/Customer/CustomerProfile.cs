@@ -3,7 +3,17 @@ namespace BankingManagementSystem.Models;
 
 public class CustomerProfile
 {
-    public CustomerBasicDetails BasicDetails { get; set; } = new CustomerBasicDetails();
-    public CustomerContactDetails ContactDetails { get; set; } = new CustomerContactDetails();
-    public KycDetails KycDetails { get; set; } = new KycDetails();
+    public CustomerBasicDetails BasicDetails { get; private set; }
+    public CustomerContactDetails ContactDetails { get; private set; }
+    public KycDetails KycDetails { get; private set; }
+
+    public CustomerProfile(
+        CustomerBasicDetails basic,
+        CustomerContactDetails contact,
+        KycDetails kyc)
+    {
+        BasicDetails = basic ?? throw new ArgumentNullException(nameof(basic));
+        ContactDetails = contact ?? throw new ArgumentNullException(nameof(contact));
+        KycDetails = kyc ?? throw new ArgumentNullException(nameof(kyc));
+    }
 }

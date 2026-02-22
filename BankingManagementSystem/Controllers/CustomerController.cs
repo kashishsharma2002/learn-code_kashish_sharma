@@ -36,69 +36,6 @@ public class CustomerController
         }
     }
 
-    public void ViewCustomerById()
-    {
-        var customerId = _inputReader.ReadInt("Enter Customer ID:");
-
-        if (!customerId.HasValue)
-            return;
-
-        try
-        {
-            var customer = _customerService.GetCustomer(customerId.Value);
-
-            DisplayCustomer(customer);
-        }
-        catch (CustomerNotFoundException ex)
-        {
-            Console.WriteLine($"Not Found: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
-    public void CloseCustomer()
-    {
-        var customerId = ReadCustomerId();
-
-        if (!customerId.HasValue)
-            return;
-
-        try
-        {
-            _customerService.CloseCustomer(customerId.Value);
-
-            Console.WriteLine("Customer closed successfully.");
-        }
-        catch (CustomerNotFoundException ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-        catch (InvalidBankingOperationException ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
-    public void ViewAllCustomers()
-    {
-        try
-        {
-            var customers = _customerService.GetAllCustomers();
-
-            foreach (var customer in customers)
-            {
-                DisplayCustomer(customer);
-            }
-        }
-        catch (InvalidBankingOperationException ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
     private CustomerProfile ReadCustomerInput()
     {
         var basicDetails = new CustomerBasicDetails
@@ -145,12 +82,48 @@ public class CustomerController
             )
         };
 
-        return new CustomerProfile
+        return new CustomerProfile(basicDetails, contactDetails, kycDetails);
+
+    }
+
+    public void ViewCustomerById()
+    {
+        var customerId = _inputReader.ReadInt("Enter Customer ID:");
+
+        if (!customerId.HasValue)
+            return;
+
+        try
         {
-            BasicDetails = basicDetails,
-            ContactDetails = contactDetails,
-            KycDetails = kycDetails
-        };
+            var customer = _customerService.GetCustomer(customerId.Value);
+
+            DisplayCustomer(customer);
+        }
+        catch (CustomerNotFoundException ex)
+        {
+            Console.WriteLine($"Not Found: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    public void ViewAllCustomers()
+    {
+        try
+        {
+            var customers = _customerService.GetAllCustomers();
+
+            foreach (var customer in customers)
+            {
+                DisplayCustomer(customer);
+            }
+        }
+        catch (InvalidBankingOperationException ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
     }
 
     private void DisplayCustomer(Customer customer)
@@ -162,6 +135,29 @@ public class CustomerController
         Console.WriteLine($"Nationality: {customer.Profile.BasicDetails.Nationality}");
         Console.WriteLine($"Email: {customer.Profile.ContactDetails.Email}");
         Console.WriteLine($"Joined On: {customer.BankJoiningDate:yyyy-MM-dd}");
+    }
+
+    public void CloseCustomer()
+    {
+        var customerId = ReadCustomerId();
+
+        if (!customerId.HasValue)
+            return;
+
+        try
+        {
+            _customerService.CloseCustomer(customerId.Value);
+
+            Console.WriteLine("Customer closed successfully.");
+        }
+        catch (CustomerNotFoundException ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        catch (InvalidBankingOperationException ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
     }
 
     private int? ReadCustomerId()

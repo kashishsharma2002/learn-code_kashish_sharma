@@ -27,18 +27,31 @@ public class AccountService : IAccountService
 
         ValidateMinimumDeposit(accountInfo.AccountType, accountInfo.Balance);
 
-        var account = new Account
+        var account = new Account(accountInfo.CustomerId, accountInfo.AccountType);
+        account.Deposit(accountInfo.Balance);
+        _accountRepository.Add(account);
+
+        return account;
+    }
+
+    private void ValidateMinimumDeposit(AccountType accountType, decimal initialDeposit)
+    {
+        decimal minimumDeposit = accountType switch
         {
-            CustomerId = accountInfo.CustomerId,
-            AccountType = accountInfo.AccountType,
-            Balance = accountInfo.Balance,
-            Status = AccountStatus.Active,
-            CreatedDate = DateTime.UtcNow
+            AccountType.Savings => AccountMinimumDeposit.SavingsAccountMinDeposit,
+            AccountType.Checking => AccountMinimumDeposit.CheckingAccountMinDeposit,
+            AccountType.Business => AccountMinimumDeposit.BusinessAccountMinDeposit,
+            _ => throw new ArgumentException("Invalid account type")
         };
 
-        _accountRepository.Add(account);
-        
-        return account;
+        if (initialDeposit < minimumDeposit)
+        {
+            throw new InvalidDepositAmountException(
+                minimumDeposit,
+                initialDeposit,
+                accountType.ToString()
+            );
+        }
     }
 
     public Account GetAccount(int accountId)
@@ -64,30 +77,13 @@ public class AccountService : IAccountService
     public void CloseAccount(int accountId)
     {
         var account = _accountRepository.GetById(accountId);
-
         if (account == null)
+        {
             throw new AccountNotFoundException(accountId);
-
-        if (account.Status == AccountStatus.Closed)
-            throw new InvalidBankingOperationException("Account is already closed");
-
-        account.Status = AccountStatus.Closed;
+        }
+        account.Close();
 
         _accountRepository.Update(account);
-    }
-
-    private void ValidateMinimumDeposit(AccountType accountType, decimal initialDeposit)
-    {
-        decimal minimumDeposit = accountType switch
-        {
-            AccountType.Savings => AccountMinimumDeposit.SavingsAccountMinDeposit,
-            AccountType.Checking => AccountMinimumDeposit.CheckingAccountMinDeposit,
-            AccountType.Business => AccountMinimumDeposit.BusinessAccountMinDeposit,
-            _ => throw new ArgumentException("Invalid account type")
-        };
-
-        if (initialDeposit < minimumDeposit)
-            throw new InvalidDepositAmountException(minimumDeposit, initialDeposit, accountType.ToString());
     }
 
 }
