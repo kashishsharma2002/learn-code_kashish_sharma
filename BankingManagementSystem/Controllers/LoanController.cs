@@ -1,6 +1,7 @@
 using BankingManagementSystem.Models;
 using BankingManagementSystem.Interfaces;
 using BankingManagementSystem.Common;
+using BankingManagementSystem.Exceptions;
 
 namespace BankingManagementSystem.Controllers;
 
@@ -25,6 +26,14 @@ public class LoanController
             DisplayLoanApplication(appliedLoan);
             DisplayLoanResult(appliedLoan);
         }
+        catch (LoanEligibilityException ex)
+        {
+            Console.WriteLine($"Loan Application Rejected: {ex.Message}");
+        }
+        catch (CustomerNotFoundException ex)
+        {
+            Console.WriteLine($"Error: Customer with ID {ex.CustomerId} not found");
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"Error applying for loan: {ex.Message}");
@@ -47,7 +56,6 @@ public class LoanController
 
         var loanType = ReadLoanType("Enter Loan Type:");
 
-        // ✅ FIX — call constructor instead of object initializer
         return new Loan(
             customerId.Value,
             accountId.Value,

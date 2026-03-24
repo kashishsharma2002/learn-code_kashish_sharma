@@ -1,4 +1,5 @@
 using BankingManagementSystem.Constants;
+using BankingManagementSystem.Exceptions;
 
 namespace BankingManagementSystem.Models;
 
@@ -53,10 +54,16 @@ public class Loan
         var maxAmount = GetMaxLoanAmount();
         var minAge = GetMinEligibleAge();
 
-        if (Amount > maxAmount || customerAge < minAge)
+        if (Amount > maxAmount)
         {
-            Reject();
-            return;
+            throw new LoanEligibilityException(
+                $"Loan amount ${Amount} exceeds maximum allowed amount ${maxAmount} for {Type} loan");
+        }
+
+        if (customerAge < minAge)
+        {
+            throw new LoanEligibilityException(
+                $"Customer age {customerAge} is below minimum required age {minAge} for {Type} loan");
         }
 
         Approve();

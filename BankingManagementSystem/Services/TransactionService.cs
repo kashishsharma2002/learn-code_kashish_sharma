@@ -75,7 +75,7 @@ public class TransactionService : ITransactionService
         var transactions = _transactionRepository.GetAll();
 
         if (!transactions.Any())
-            throw new InvalidOperationException("No transactions found");
+            throw new InvalidBankingOperationException("No transactions found");
 
         return transactions;
     }

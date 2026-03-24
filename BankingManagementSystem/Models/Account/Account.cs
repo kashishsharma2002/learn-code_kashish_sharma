@@ -1,3 +1,5 @@
+using BankingManagementSystem.Exceptions;
+
 namespace BankingManagementSystem.Models;
 
 public class Account
@@ -21,7 +23,7 @@ public class Account
     public void Deposit(decimal amount)
     {
         if (Status == AccountStatus.Closed)
-            throw new InvalidOperationException("Cannot deposit to a closed account.");
+            throw new InvalidBankingOperationException("Cannot deposit to a closed account.");
 
         if (amount <= 0)
             throw new ArgumentException("Amount must be positive.");
@@ -32,13 +34,13 @@ public class Account
     public void Withdraw(decimal amount)
     {
         if (Status == AccountStatus.Closed)
-            throw new InvalidOperationException("Cannot withdraw from a closed account.");
+            throw new InvalidBankingOperationException("Cannot withdraw from a closed account.");
 
         if (amount <= 0)
             throw new ArgumentException("Amount must be positive.");
 
         if (amount > Balance)
-            throw new InvalidOperationException("Insufficient funds.");
+            throw new InsufficientFundsException(amount, Balance);
 
         Balance -= amount;
     }
@@ -46,10 +48,10 @@ public class Account
     public void Close()
     {
         if (Status == AccountStatus.Closed)
-            throw new InvalidOperationException("Account is already closed.");
+            throw new InvalidBankingOperationException("Account is already closed.");
 
         if (Balance > 0)
-            throw new InvalidOperationException("Withdraw remaining balance before closing account.");
+            throw new InvalidBankingOperationException("Withdraw remaining balance before closing account.");
 
         Status = AccountStatus.Closed;
     }

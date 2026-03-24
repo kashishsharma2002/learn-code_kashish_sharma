@@ -30,7 +30,15 @@ public class LoanService : ILoanService
 
         int age = CalculateCustomerAge(loan.CustomerId);
 
-        loan.EvaluateEligibility(age);
+        try
+        {
+            loan.EvaluateEligibility(age);
+        }
+        catch (LoanEligibilityException ex)
+        {
+            throw new LoanEligibilityException(
+                $"Loan application rejected for customer {loan.CustomerId}: {ex.Message}");
+        }
 
         _loanRepository.Add(loan);
 
