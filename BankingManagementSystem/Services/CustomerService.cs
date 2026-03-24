@@ -1,0 +1,82 @@
+using BankingManagementSystem.Models;
+using BankingManagementSystem.Interfaces;
+using BankingManagementSystem.Exceptions;
+
+namespace BankingManagementSystem.Services;
+
+public class CustomerService : ICustomerService
+{
+    private readonly ICustomerRepository _customerRepository;
+    private static int _customerIdCounter = 1;
+
+    public CustomerService(ICustomerRepository customerRepository)
+    {
+        _customerRepository = customerRepository;
+    }
+
+    public Customer RegisterCustomer(CustomerProfile profile)
+    {
+        if (profile == null)
+        {
+            throw new ArgumentNullException(nameof(profile), "Customer profile cannot be null");
+        }
+
+        var customer = new Customer(_customerIdCounter++, profile);
+
+        _customerRepository.Add(customer);
+
+        return customer;
+    }
+
+    public Customer GetCustomer(int customerId)
+    {
+        var customer = _customerRepository.GetById(customerId);
+
+        if (customer == null)
+        {
+            throw new CustomerNotFoundException(customerId);
+        }
+
+        return customer;
+    }
+
+    public IEnumerable<Customer> GetAllCustomers()
+    {
+        var customerList = _customerRepository.GetAll();
+
+        if (!customerList.Any())
+            throw new InvalidBankingOperationException("No customers found");
+
+        return customerList;
+    }
+
+    public void CloseCustomer(int customerId)
+    {
+        var customer = _customerRepository.GetById(customerId);
+
+        if (customer == null)
+        {
+            throw new CustomerNotFoundException(customerId);
+        }
+        customer.Close();
+
+        _customerRepository.Update(customer);
+    }
+
+    public void UpdateCustomer(int customerId, CustomerProfile profile)
+    {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
+
+        var customer = _customerRepository.GetById(customerId);
+
+        if (customer == null)
+        {
+            throw new CustomerNotFoundException(customerId);
+        }
+        customer.UpdateProfile(profile);
+
+        _customerRepository.Update(customer);
+    }
+
+}
