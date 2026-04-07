@@ -31,10 +31,10 @@ public class App
             {
                 var results = await _controller.GetLocationAsync(input);
 
-                int i = 1;
+                int index = 1;
                 foreach (var res in results)
                 {
-                    Console.WriteLine($"\nResult {i++}:");
+                    Console.WriteLine($"\nResult {index++}:");
                     Console.WriteLine($"Name: {res.Name}");
                     Console.WriteLine($"Latitude: {res.Latitude}");
                     Console.WriteLine($"Longitude: {res.Longitude}");

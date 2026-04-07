@@ -20,13 +20,16 @@ public class LocationService : ILocationService
             throw new Exception("No results found.");
 
         return results
-            .Where(r => !string.IsNullOrWhiteSpace(r.Name) && 
-                        r.Name.Contains(location, System.StringComparison.OrdinalIgnoreCase))
-            .GroupBy(r => r.Name)
-            .Select(g => g.First())
-            .OrderByDescending(r => r.Name.Equals(location, System.StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(r => r.Name.StartsWith(location, System.StringComparison.OrdinalIgnoreCase))
-            .ThenBy(r => r.Name)
+            .Where(result =>
+                !string.IsNullOrWhiteSpace(result.Name) &&
+                result.Name.Contains(location, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(result => result.Name)
+            .Select(group => group.First()) 
+            .OrderByDescending(result =>
+                result.Name.Equals(location, StringComparison.OrdinalIgnoreCase))
+            .ThenByDescending(result =>
+                result.Name.StartsWith(location, StringComparison.OrdinalIgnoreCase))
+            .ThenBy(result => result.Name)   
             .ToList();
     }
 }
